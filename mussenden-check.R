@@ -185,6 +185,227 @@ searchreason_2015 <- d2015 %>%
   summarise(count= n()) %>%
   arrange(count)
 
+# Agencies reported huge jumps in stop numbers between years. The Maryland Transportation Authority reported 150,000 stops one year and just 50,000 the next. SM CHECKED. ADJUST NUMBERS TO MATCH DATA. 
+
+# Find MTA in each year by looking at above queries agency_YYYY
+# 2009 = MDTA Police 130530
+# 2011 = Maryland Transportation Authority 152395
+# 2012 = Maryland Transportation Authority Police 52994
+# 2013 = Maryland Transportation Authority Police 52497
+# 2015 = MARYLAND TRANSPORTATION AUTHORITY 68836
+
+# Other agencies reported no searches. YEP. 
+
+agency_summary_2009 <- d2009 %>%
+  group_by(Agency) %>%
+  summarise_all(funs(sum(!is.na(.)))) 
+
+agency_2009 <- d2009 %>%
+  group_by(Agency) %>%
+  summarise(total= n()) %>%
+  arrange(total)
+
+agency_summary_2009_join <- left_join(agency_2009, agency_summary_2009, by="Agency")
+
+agency_summary_2009_join_sum <- agency_summary_2009_join %>%
+  group_by(Agency) %>%
+  mutate(pct_search = (Search/total)*100)
+
+agency_summary_2011 <- d2011 %>%
+  group_by(Agency) %>%
+  summarise_all(funs(sum(!is.na(.)))) 
+
+agency_2011 <- d2011 %>%
+  group_by(Agency) %>%
+  summarise(total= n()) %>%
+  arrange(total)
+
+agency_summary_2011_join <- left_join(agency_2011, agency_summary_2011, by="Agency")
+
+agency_summary_2011_join_sum <- agency_summary_2011_join %>%
+  group_by(Agency) %>%
+  mutate(pct_search = (Search/total)*100)
+
+agency_summary_2012 <- d2012 %>%
+  group_by(Agency) %>%
+  summarise_all(funs(sum(!is.na(.)))) 
+
+agency_2012 <- d2012 %>%
+  group_by(Agency) %>%
+  summarise(total= n()) %>%
+  arrange(total)
+
+agency_summary_2012_join <- left_join(agency_2012, agency_summary_2012, by="Agency")
+
+agency_summary_2012_join_sum <- agency_summary_2012_join %>%
+  group_by(Agency) %>%
+  mutate(pct_search = (Search/total)*100)  
+
+agency_summary_2013 <- d2013 %>%
+  group_by(Agency) %>%
+  summarise_all(funs(sum(!is.na(.)))) 
+
+agency_2013 <- d2013 %>%
+  group_by(Agency) %>%
+  summarise(total= n()) %>%
+  arrange(total)
+
+agency_summary_2013_join <- left_join(agency_2013, agency_summary_2013, by="Agency")
+
+agency_summary_2013_join_sum <- agency_summary_2013_join %>%
+  group_by(Agency) %>%
+  mutate(pct_search = (Search/total)*100)  
+
+# Or they reported thousands of searches, but not one that turned up contraband. YEP - in 2013, especially bad
+
+#2009
+# Get a list of departments with more than 1K searches.
+bigagency_2009 <- d2009 %>%
+  filter(!is.na(Search)) %>%
+  group_by(Agency) %>%
+  summarise(count=n()) %>%
+  filter(count >= 1000) 
+
+# Get a complete list of all cases by departements with more 1K searches
+bigagency_2009 <- left_join(bigagency_2009, d2009, by="Agency")
+
+# Filter only searches
+bigagency_2009 <- bigagency_2009 %>%
+  filter(!is.na(Search)) %>%
+  group_by(Agency, Disposition) %>%
+  summarise(count=n()) %>%
+  spread(Disposition, count)
+
+#2011
+# Get a list of departments with more than 1K searches.
+bigagency_2011 <- d2011 %>%
+  filter(!is.na(Search)) %>%
+  group_by(Agency) %>%
+  summarise(count=n()) %>%
+  filter(count >= 1000) 
+
+# Get a complete list of all cases by departements with more 1K searches
+bigagency_2011 <- left_join(bigagency_2011, d2011, by="Agency")
+
+# Filter only searches
+bigagency_2011 <- bigagency_2011 %>%
+  filter(!is.na(Search)) %>%
+  group_by(Agency, Disposition) %>%
+  summarise(count=n()) %>%
+  spread(Disposition, count)
+
+#2012
+# Get a list of departments with more than 1K searches.
+bigagency_2012 <- d2012 %>%
+  filter(!is.na(Search)) %>%
+  group_by(Agency) %>%
+  summarise(count=n()) %>%
+  filter(count >= 1000) 
+
+# Get a complete list of all cases by departements with more 1K searches
+bigagency_2012 <- left_join(bigagency_2012, d2012, by="Agency")
+
+# Filter only searches
+bigagency_2012 <- bigagency_2012 %>%
+  filter(!is.na(Search)) %>%
+  group_by(Agency, Disposition) %>%
+  summarise(count=n()) %>%
+  spread(Disposition, count)
+
+#2013
+
+# Get a list of departments with more than 1K searches.
+bigagency_2013 <- d2013 %>%
+  filter(!is.na(Search)) %>%
+  group_by(Agency) %>%
+  summarise(count=n()) %>%
+  filter(count >= 1000) 
+
+# Get a complete list of all cases by departements with more 1K searches
+bigagency_2013 <- left_join(bigagency_2013, d2013, by="Agency")
+
+# Filter only searches
+bigagency_2013 <- bigagency_2013 %>%
+  filter(!is.na(Search)) %>%
+  group_by(Agency, Disposition) %>%
+  summarise(count=n()) %>%
+  spread(Disposition, count)
+
+
+contraband_2011 <- d2011 %>%
+  filter(!is.na(Search)) %>%
+  group_by(Agency, Disposition) %>%
+  summarise(count = n())
+
+
+# The Baltimore Police Department’s records are missing 17 of the 21 details about each stop that are required by law — including where the car was stopped and whether the person was arrested or received a warning, citation or repair order. UNCLEAR
+
+
+
+# But the city department’s traffic stop data has large gaps, showing just 4,410 stops in 2009 (YEP) — and more than 35,000 the next year reported (YEP). The total climbed to 50,000, then 80,000 in the following years. YEP AND YEP
+baltimore_2009 <- d2009 %>%
+  filter(Agency == "Baltimore PD") %>%
+  group_by(Agency) %>%
+  summarise(count=n())
+
+baltimore_2011 <- d2011 %>%
+  filter(Agency == "Baltimore Police Department") %>%
+  group_by(Agency) %>%
+  summarise(count=n())
+
+baltimore_2012 <- d2012 %>%
+  filter(Agency == "Baltimore City Police Department") %>%
+  group_by(Agency) %>%
+  summarise(count=n())
+
+baltimore_2013 <- d2013 %>%
+  filter(Agency == "Baltimore Police Department") %>%
+  group_by(Agency) %>%
+  summarise(count=n())
+
+baltimore_2015 <- d2015 %>%
+  filter(AGENCY == "BALTIMORE POLICE DEPARTMENT") %>%
+  group_by(AGENCY) %>%
+  summarise(count=n())
+
+#Those records show just 36 searches by the Baltimore police in 2009 (YEP)— and none that turned up drugs, weapons or other contraband. YEP
+baltimore_contraband_2009 <- d2009 %>%
+  filter(Agency == "Baltimore PD") %>%
+  filter(!is.na(Search))
+
+#In fact, in the five years of data analyzed, the data show just 55 searches that found those items.
+baltimore_contraband_2009 <- d2009 %>%
+  filter(Agency == "Baltimore PD") %>%
+  filter(!is.na(Search)) %>%
+  filter(!is.na(Disposition)) %>%
+  filter(Disposition != "none")
+
+baltimore_contraband_2011 <- d2011 %>%
+  filter(Agency == "Baltimore Police Department") %>%
+  filter(!is.na(Search)) %>%
+  filter(!is.na(Disposition)) %>%
+  filter(Disposition != "none")
+
+baltimore_contraband_2012 <- d2012 %>%
+  filter(Agency == "Baltimore City Police Department") %>%
+  filter(!is.na(Search)) %>%
+  filter(!is.na(Disposition)) %>%
+  filter(Disposition != "none")
+
+baltimore_contraband_2013 <- d2013 %>%
+  filter(Agency == "Baltimore Police Department") %>%
+  filter(!is.na(Search)) %>%
+  filter(!is.na(Disposition)) %>%
+  filter(Disposition != "none")
+
+baltimore_contraband_2015 <- d2015 %>%
+  filter(AGENCY == "BALTIMORE POLICE DEPARTMENT") %>%
+  filter(!is.na(`SEARCH DISPOSITION`)) %>%
+  filter(`SEARCH DISPOSITION` != "NONE")
+
+balt2015 <- d2015 %>%
+  filter(AGENCY == "BALTIMORE POLICE DEPARTMENT")
+
 # subset stops made by baltimore police department each year
 balt2009 <- subset(d2009, Agency == "Baltimore PD")
 balt2011 <- subset(d2011, Agency == "Baltimore Police Department")
